@@ -127,7 +127,7 @@ AUTH_FAIL:MOV AL,'q'
             MOV AL,'Q'
             CMP AL,in_name[2]
             JE EXIT
-            MOV AL,0DH
+            MOV AL,0
             CMP AL,in_name[2]
             JNE INPUT_PWD
             MOV BH,0
@@ -305,7 +305,13 @@ FUNCTION3_3:MOV AX,PROFIT1
             INT 21H
             JMP FUNCION1
 
-FUNCTION3_4:LEA DX,goods_name
+FUNCTION3_4:MOV DL,0AH
+            MOV AH,2
+            INT 21H
+            MOV DL,0DH
+            MOV AH,2
+            INT 21H
+            LEA DX,goods_name[2]
             MOV AH,9
             INT 21H
             JMP FUNCION1
