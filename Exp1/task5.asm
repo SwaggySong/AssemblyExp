@@ -33,10 +33,10 @@ GB2 DB 'BOOK',6 DUP(0)
 GB1 DB 'PEN',7 DUP(0)
     DW 35,50,30,24,?
 GBN DB N-2 DUP('TEMP-VALUE',15,0,20,0,30,0,2,0,?,?)
-INPUT_NAME_MSG DB 0AH,0DH,'please input name:$'
+INPUT_NAME_MSG DB 0AH,0DH,'please input name(input q/Q to exit):$'
 INPUT_PASS_MSG DB 0AH,0DH,'please input password:$'
-LOGIN_FAILED_MSG DB 0AH,0DH,'Login failed! Please input name and pwd again!$'
-END_MSG DB 0AH,0DH,'end of program, press any key to continue$'
+LOGIN_FAILED_MSG DB 0AH,0DH,'Login failed! Please check the name or the password!$'
+END_MSG DB 0AH,0DH,'end of program, press any key to continue...$'
 INPUT_GOODS_NAME_MSG DB 0AH,0DH,'please input the name of the goods:$'
 INPUT_GOODS_NAME_AGAIN DB 0AH,0DH,'goods name input error,please input again:$'
 GRADE_A_MSG DB 0AH,0DH,'A$'
@@ -122,6 +122,9 @@ AUTH_SUCCESS:MOV BH,1
             JMP FUNCTION3
 
 AUTH_FAIL:MOV AL,'q'
+            CMP AL,in_name[2]
+            JE EXIT
+            MOV AL,'Q'
             CMP AL,in_name[2]
             JE EXIT
             MOV AL,0DH
@@ -253,13 +256,13 @@ FUNCTION3_1:LEA DX,INPUT_GOODS_NAME_AGAIN
             JMP FUNCTION3
 
 FUNCTION3_3:MOV AX,PROFIT1
-            IMUL AX,WORD PTR 100
+            IMUL AX,WORD PTR 10
             MOV DX,0
             IDIV COST1
             MOV AH,0
             MOV PR1,AX
             MOV AX,PROFIT2
-            IMUL AX,WORD PTR 100
+            IMUL AX,WORD PTR 10
             MOV DX,0
             IDIV COST2
             MOV AH,0
@@ -267,11 +270,11 @@ FUNCTION3_3:MOV AX,PROFIT1
             ADD AX,PR2
             MOV APR,AX
 
-            CMP APR,180
+            CMP APR,18
             JNL GRADE_A
-            CMP APR,100
+            CMP APR,10
             JNL GRADE_B
-            CMP APR,40
+            CMP APR,4
             JNL GRADE_C
             CMP APR,0
             JNL GRADE_D
