@@ -16,3 +16,6 @@ d:
 则set PATH=%%PATH%;C:\中的C:\应相应地换为E:\
 2，e:\Desktop\Workspace\Assembly为汇编工作目录。
 使用时需要进行相应替换。
+
+新增autocopy.bat脚本，该脚本用于将某一次实验中的
+.asm,.exe复制到文件夹中并压缩成zip文件
