@@ -21,6 +21,7 @@ PROFIT2 DW 0;利润
 BNAME DB 'LONG JQ',3 DUP(0);老板姓名
 BPASS DB 'NOPASS';密码
 N EQU 30
+goods_offset dw 0
 SHOP1 DB 'SHOP1',0;网店名称，0结束
 GA1 DB 'PEN',7 DUP(0)
     DW 35,56,70,25,?
@@ -28,10 +29,10 @@ GA2 DB 'BOOK',6 DUP(0)
     DW 12,30,25,5,?
 GAN DB N-2 DUP('TEMP-VALUE',15,0,20,0,30,0,2,0,?,?)
 SHOP2 DB 'SHOP2',0;网店名称，0结束
-GB2 DB 'BOOK',6 DUP(0)
-    DW 12,28,20,15,?
 GB1 DB 'PEN',7 DUP(0)
     DW 35,50,30,24,?
+GB2 DB 'BOOK',6 DUP(0)
+    DW 12,28,20,15,?
 GBN DB N-2 DUP('TEMP-VALUE',15,0,20,0,30,0,2,0,?,?)
 INPUT_NAME_MSG DB 0AH,0DH,'please input name(input q/Q to exit):$'
 INPUT_PASS_MSG DB 0AH,0DH,'please input password:$'
@@ -169,21 +170,7 @@ FUNCTION3:MOV SI,0
             INC SI
             DEC CX
             JNZ IS_PEN
-            MOV BYTE PTR goods_name[SI+3],'$'
-            MOV AX,WORD PTR GA1[10];进货价
-            IMUL GA1[14];AX现为cost1
-            MOV COST1,AX
-            MOV AX, WORD PTR GA1[12];销售价
-            IMUL GA1[16];AX现为profit1+COST1
-            SUB AX,COST1;AX现为profit1
-            MOV PROFIT1,AX
-            MOV AX,WORD PTR GB1[10];进货价
-            IMUL GB1[14];AX现为cost2
-            MOV COST2,AX
-            MOV AX,WORD PTR GB1[12];销售价
-            IMUL GB1[16];AX现为profit2+cost2
-            SUB AX,COST2
-            MOV PROFIT2,AX
+            mov goods_offset,0
             CMP AUTH,0
             JE FUNCTION3_4
             JMP FUNCTION3_3
@@ -194,21 +181,7 @@ FUNCTION3:MOV SI,0
             INC SI
             DEC CX
             JNZ IS_BOOK
-            MOV BYTE PTR goods_name[SI+3],'$'
-            MOV AX,WORD PTR GA2[10];进货价
-            IMUL GA2[14];AX现为cost1
-            MOV COST1,AX
-            MOV AX,WORD PTR GA2[12];销售价
-            IMUL GA2[16]
-            SUB AX,COST1;AX现为profit1
-            MOV PROFIT1,AX
-            MOV AX,WORD PTR GB2[10];进货价
-            IMUL GB2[14];AX现为cost2
-            MOV COST2,AX
-            MOV AX,WORD PTR GB2[12];销售价
-            IMUL GB2[16]
-            SUB AX,COST2;AX现为profit2
-            MOV PROFIT2,AX
+            mov goods_offset,20
             CMP AUTH,0
             JE FUNCTION3_4
             JMP FUNCTION3_3
@@ -218,22 +191,8 @@ FUNCTION3:MOV SI,0
             JNE IS_GOODS
             INC SI
             DEC CX
-            JNZ IS_PEN
-            MOV BYTE PTR goods_name[SI+3],'$'
-            MOV AX,WORD PTR GAN[10];进货价
-            IMUL GAN[14];AX现为cost1
-            MOV COST1,AX
-            MOV AX,WORD PTR GAN[12];销售价
-            IMUL GAN[16]
-            SUB AX,COST1;AX现为profit1
-            MOV PROFIT1,AX
-            MOV AX,WORD PTR GB1[10];进货价
-            IMUL GB1[14];AX现为cost2
-            MOV COST2,AX
-            MOV AX,WORD PTR GB1[12];销售价
-            IMUL GB1[16]
-            SUB AX,COST2;AX现为profit2
-            MOV PROFIT2,AX
+            JNZ IS_N
+            mov goods_offset,40
             CMP AUTH,0
             JE FUNCTION3_4
             JMP FUNCTION3_3
@@ -255,18 +214,39 @@ FUNCTION3_1:LEA DX,INPUT_GOODS_NAME_AGAIN
             INT 21H
             JMP FUNCTION3
 
-FUNCTION3_3:MOV AX,PROFIT1
+FUNCTION3_3:
+            MOV BYTE PTR goods_name[SI+3],'$'
+            mov si,goods_offset
+
+            MOV AX,WORD PTR GA1[si+10];进货价
+            IMUL GA1[si+14];AX现为cost1
+            MOV COST1,AX
+            MOV AX,WORD PTR GA1[si+12];销售价
+            IMUL GA1[si+16]
+            SUB AX,COST1;AX现为profit1
+            MOV PROFIT1,AX
+
+            MOV AX,WORD PTR GB1[si+10];进货价
+            IMUL GB1[si+14];AX现为cost2
+            MOV COST2,AX
+            MOV AX,WORD PTR GB1[si+12];销售价
+            IMUL GB1[si+16]
+            SUB AX,COST2;AX现为profit2
+            MOV PROFIT2,AX
+
+            mov dx,0
+            MOV AX,PROFIT1
             IMUL AX,WORD PTR 10
-            MOV DX,0
+            cwd
             IDIV COST1
-            MOV AH,0
             MOV PR1,AX
+            mov dx,0
             MOV AX,PROFIT2
             IMUL AX,WORD PTR 10
-            MOV DX,0
+            cwd
             IDIV COST2
-            MOV AH,0
             MOV PR2,AX
+            mov ax,pr1
             ADD AX,PR2
             MOV APR,AX
 
